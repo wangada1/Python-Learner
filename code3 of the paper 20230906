@@ -1,0 +1,36 @@
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+
+# 加载数据
+data = pd.read_excel('your_data.xlsx')#这个数据保存在本地，具体内容请参考论文王阳，侯丹丹，林燕丹. 教室光环境和教育压力对近视发展的影响和预测模型研究. 照明工程学报. 2023.（中文核心，录用）
+
+# 提取自变量和因变量
+X = data[['政策资源分级', '中午户外活动时长', '年级', '连续写作业时长', '躺着阅读频率', '居家作业时对自然光的使用']]
+y_near = data['近视']
+y_high_near = data['高度近视']
+
+# 划分训练集和测试集
+X_train, X_test, y_near_train, y_near_test, y_high_near_train, y_high_near_test = train_test_split(
+    X, y_near, y_high_near, test_size=0.3, random_state=42
+)
+
+# 创建随机森林分类器并拟合近视模型
+rf_near = RandomForestClassifier(n_estimators=1, random_state=42)
+rf_near.fit(X_train, y_near_train)
+
+# 创建随机森林分类器并拟合高度近视模型
+rf_high_near = RandomForestClassifier(n_estimators=500, random_state=42)
+rf_high_near.fit(X_train, y_high_near_train)
+
+# 在测试集上进行预测
+y_near_pred = rf_near.predict(X_test)
+y_high_near_pred = rf_high_near.predict(X_test)
+
+# 输出分类报告
+print("近视分类报告:")
+print(classification_report(y_near_test, y_near_pred))
+
+print("高度近视分类报告:")
+print(classification_report(y_high_near_test, y_high_near_pred))
