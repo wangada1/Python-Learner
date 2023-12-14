@@ -1,0 +1,76 @@
+import pandas as pd
+import numpy as np
+import time
+
+start_time = time.time()
+
+
+from sklearn.metrics import mean_absolute_error
+
+# 读取Excel文件
+data = pd.read_excel('your_data_file.xlsx')
+
+# 提取特征和标签
+features = data[['SL', 'x', 'y', 'z', 'LGF']]
+labels = data['真实值']
+
+features = features.astype(float)
+
+
+# 定义适应度函数
+def fitness_function(params):
+    a, b, c, d, e, f = params
+
+    # 计算预测值
+    predictions = -a * features['SL'] + b * 7.3 * features['x'] - c * 6.47 * np.log(features['y'] + 1) + d * 0.22 * \
+                  features['z'] + e * features['LGF'] + f
+
+    # 判断预测值和真实值之间的差距，计算预测正确的个数
+    diff = np.abs(predictions - labels)
+    correct_predictions = np.sum(diff < 12.5)
+
+    return correct_predictions
+
+
+# 定义遗传算法的参数
+population_size = 100
+num_generations = 1000
+
+num_params = 6
+param_bounds = [(0, 100)] + [(0, 1)] * (num_params - 2) + [(0, 100)] + [(-50, 50)]
+
+# 初始化种群
+population = [np.random.uniform(low=0, high=1, size=num_params) for _ in range(population_size)]
+
+# 遗传算法主循环
+for generation in range(num_generations):
+    # 计算适应度
+    fitness_scores = [fitness_function(params) for params in population]
+    fitness_myopia = [fitness_function(params) for params in population]
+    # 选择操作
+    selected_indices = np.argsort(fitness_scores)[-population_size // 2:]
+    parents = [population[i] for i in selected_indices]
+
+    # 交叉操作
+    offspring = []
+    while len(offspring) < population_size:
+        parent1, parent2 = np.random.choice(range(len(parents)), size=2, replace=False)
+        child = np.concatenate((parents[parent1][:num_params // 2], parents[parent2][num_params // 2:]))
+        offspring.append(child)
+    population = offspring
+
+    # 变异操作
+    for i in range(population_size):
+        for j in range(num_params):
+            if np.random.rand() < 0.1:  # 变异率
+                population[i][j] = np.random.uniform(*param_bounds[j])
+
+# 找到适应度最高的解
+best_params = population[np.argmax([fitness_function(params) for params in population])]
+# 输出结果
+print("正确个数:", fitness_function(best_params))
+print("正确率:", fitness_function(best_params) / 282)
+print("最佳系数:", best_params)
+end_time = time.time()
+execution_time = end_time - start_time
+print("代码的运行时间为：", execution_time, "秒")
