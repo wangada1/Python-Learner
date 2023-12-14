@@ -1,0 +1,60 @@
+# -*- coding: utf-8 -*-
+
+import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
+
+# 数据
+categories = ['学校类型', '年级', '性别', '太阳直射', '照度感受', '色温感受', '中午户外活动时长', '连续写作业时长', '连续看电视时长', '躺着阅读频率', '交通工具上阅读频率', '近视', '高度近视']
+data = [
+    [13.1, 18.8, 24.8, 43.3],
+    [29.1, 15.6, 29.4, 12.8, 13.1],
+    [47.9, 52.1],
+    [25.2, 74.8],
+    [1.1, 95.0, 3.9],
+    [13.8, 74.5, 11.7],
+    [12.1, 34.0, 25.5, 28.4],
+    [15.2, 61.7, 14.5, 8.5],
+    [44.7, 39.7, 9.2, 6.4],
+    [51.1, 36.2, 9.9, 2.8],
+    [69.1, 25.5, 4.6, 0.7],
+    [58.2, 41.8],
+    [94.3, 5.7]
+]
+
+# 创建图形
+fig, ax = plt.subplots(figsize=(12, 8))
+
+# 设置柱的颜色
+colors = ['#FFA07A', '#FFC0CB', '#FFD700', '#00FF7F', '#87CEFA', '#9370DB', '#FFB6C1', '#7FFF00', '#FF8C00', '#808080', '#8B4513', '#FF1493', '#20B2AA']
+
+# 绘制柱状图
+bars = []
+for i in range(len(categories)):
+    x = [i]
+    y = data[i]
+    width = 0.8
+    color = colors[i % len(colors)]
+    bar = ax.bar(x, y, width, color=color)
+    bars.append(bar)
+
+    # 添加标注
+    for j, value in enumerate(data[i]):
+        ax.text(i, value, '{:.1f}%'.format(value), ha='center', va='bottom', color='black')
+
+    # 添加分布比例名称标注
+    ax.text(i, -10, '\n'.join(categories[i].split(':')), ha='center', va='bottom', fontsize=8)
+
+# 设置坐标轴标签
+ax.set_xlabel('问卷信息')
+ax.set_ylabel('选项分布')
+
+# 设置刻度标签
+ax.set_xticks(range(len(categories)))
+ax.set_xticklabels(categories,rotation=45)
+
+# 设置图例
+ax.legend(bars, ['{} ({:.1f}%)'.format(category, data[i][0]) for i, category in enumerate(categories)])
+
+# 显示图形
+plt.tight_layout()
+plt.show()
